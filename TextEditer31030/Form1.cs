@@ -16,7 +16,6 @@ namespace TextEditer31030 {
         //現在編集中のファイル名
         private string editFilePath = "";//Camel形式（⇔Pascal形式）
 
-
         public テキストエディタ()
         {
             InitializeComponent();
@@ -37,6 +36,7 @@ namespace TextEditer31030 {
             this.Text = editFilePath;
         }
 
+        //開く
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if (ofdFileOpen.ShowDialog() == DialogResult.OK) {
@@ -48,17 +48,22 @@ namespace TextEditer31030 {
             }
         }
 
+        //ファイル名を指定しデータを保存
+        private void FileSave(string editFileName)
+        {
+            using (StreamWriter sw = new StreamWriter(editFileName, false, Encoding.GetEncoding("utf-8"))) {
+                sw.WriteLine(rtTextArea.Text);
+            }
+        }
+
         //名前を付けて保存
         private void SaveNameToolStripMenuItem_Click(object sender, EventArgs e)
         {
             if(sfdFileSave.ShowDialog() == DialogResult.OK)
             {
-                using(StreamWriter sw = new StreamWriter(sfdFileSave.FileName, false, Encoding.GetEncoding("utf-8"))) 
-                {
-                    sw.WriteLine(rtTextArea.Text);
-                    editFilePath = sfdFileSave.FileName;
-                    this.Text = editFilePath;
-                }
+                FileSave(sfdFileSave.FileName);
+                this.Text = sfdFileSave.FileName;
+                editFilePath = sfdFileSave.FileName;
             }
         }
 
@@ -67,12 +72,19 @@ namespace TextEditer31030 {
         {
             if (File.Exists(editFilePath))
             {
-                using (StreamWriter sw = new StreamWriter(editFilePath, false, Encoding.GetEncoding("utf-8")))
-                {
-                    sw.WriteLine(rtTextArea.Text);
-                }
+                FileSave(editFilePath);
             } else {
                 SaveNameToolStripMenuItem_Click(sender, e);
+            }
+        }
+
+        //元に戻す
+        private void UndoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if (rtTextArea.CanUndo)
+            {
+                rtTextArea.Undo();
+                rtTextArea.ClearUndo();
             }
         }
     }
