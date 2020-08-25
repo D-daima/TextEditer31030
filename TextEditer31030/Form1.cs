@@ -78,13 +78,106 @@ namespace TextEditer31030 {
             }
         }
 
+        private void cheakEnabled()
+        {
+            if (rtTextArea.CanUndo) {
+                UndoToolStripMenuItem.Enabled = true;
+            } else {
+                UndoToolStripMenuItem.Enabled = false;
+            }
+        }
+
         //元に戻す
         private void UndoToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (rtTextArea.CanUndo)
+            rtTextArea.Undo();
+            if (rtTextArea.CanRedo) {
+                RedoToolStripMenuItem.Enabled = true;
+            } else {
+                UndoToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        //やり直し
+        private void RedoToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rtTextArea.Redo();
+            if (rtTextArea.CanRedo) {
+                RedoToolStripMenuItem.Enabled = true;
+            } else {
+                RedoToolStripMenuItem.Enabled = false;
+            }
+        }
+
+        //テキストに変化があったとき
+        private void rtTextArea_TextChanged(object sender, EventArgs e)
+        {
+            cheakEnabled();
+        }
+
+        //編集ボタン
+        private void EditToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            DataFormats.Format myformat = DataFormats.GetFormat(DataFormats.Rtf);
+            //undo
+            UndoToolStripMenuItem.Enabled = rtTextArea.CanUndo;
+            //redo
+            RedoToolStripMenuItem.Enabled = rtTextArea.CanRedo;
+            //cut
+            CutToolStripMenuItem.Enabled = (rtTextArea.SelectionLength > 0);
+            //copy
+            CopyToolStripMenuItem.Enabled = (rtTextArea.SelectionLength > 0);
+            //paste
+            PasteToolStripMenuItem.Enabled = Clipboard.GetDataObject().GetDataPresent(DataFormats.Rtf);
+            //delete
+            DeleteToolStripMenuItem.Enabled = (rtTextArea.SelectionLength > 0);
+            
+        }
+
+
+        //カット
+        private void CutToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rtTextArea.Cut();
+        }
+
+        //コピー
+        private void CopyToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            rtTextArea.Copy();
+        }
+
+        //ペースト
+        private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(PasteToolStripMenuItem.Enabled == true) {
+                rtTextArea.Paste();
+            }
+        }
+
+        //削除
+        private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(DeleteToolStripMenuItem.Enabled == true) {
+                rtTextArea.SelectedText = "";
+            }
+
+        }
+
+        //カラー
+        private void ColorToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(cdColor.ShowDialog() == DialogResult.OK) {
+                rtTextArea.SelectionColor = cdColor.Color;
+            }
+        }
+
+        //フォント
+        private void FontToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            if(fdFont.ShowDialog() == DialogResult.OK)
             {
-                rtTextArea.Undo();
-                rtTextArea.ClearUndo();
+                rtTextArea.SelectionFont = fdFont.Font;
             }
         }
     }
