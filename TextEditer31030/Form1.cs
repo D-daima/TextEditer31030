@@ -6,6 +6,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Runtime.CompilerServices;
+using System.Runtime.Remoting.Channels;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -24,36 +25,73 @@ namespace TextEditer31030 {
         //終了
         private void ExitToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            //アプリケーション終了
             Application.Exit();
         }
-
+        //×ボタン
+        private void テキストエディタ_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (rtTextArea.Modified) {
+                DialogResult result = MessageBox.Show("ファイルを保存しますか？",
+                "質問",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Exclamation,
+                MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes) {
+                    SaveToolStripMenuItem_Click(sender, e);
+                } else if (result == DialogResult.No) {
+                } else if (result == DialogResult.Cancel) {
+                    return;
+                }
+            }
+        }
         //新規作成
         private void NewToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            if (rtTextArea.Modified) {
+                DialogResult result = MessageBox.Show("ファイルを保存しますか？",
+                "質問",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Exclamation,
+                MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes) {
+                    SaveToolStripMenuItem_Click(sender, e);
+                } else if (result == DialogResult.No) {
+                } else if (result == DialogResult.Cancel) {
+                    return;
+                }
+            }
             rtTextArea.Clear();
             editFilePath = "";
-            this.Text = editFilePath;
+            this.Text = "";
         }
 
         //開く
         private void OpenToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if (ofdFileOpen.ShowDialog() == DialogResult.OK) {
-                using (StreamReader sr = new StreamReader(ofdFileOpen.FileName, Encoding.GetEncoding("utf-8"), false)) {
-                    rtTextArea.Text = sr.ReadToEnd();
-                    editFilePath = ofdFileOpen.FileName;
-                    this.Text = editFilePath;
+            if (rtTextArea.Modified) {
+                DialogResult result = MessageBox.Show("ファイルを保存しますか？",
+                "質問",
+                MessageBoxButtons.YesNoCancel,
+                MessageBoxIcon.Exclamation,
+                MessageBoxDefaultButton.Button1);
+                if (result == DialogResult.Yes) {
+                    SaveToolStripMenuItem_Click(sender, e);
+                } else if (result == DialogResult.No) {
+                } else if (result == DialogResult.Cancel) {
+                    return;
                 }
+            }
+            if (ofdFileOpen.ShowDialog() == DialogResult.OK) {
+                rtTextArea.LoadFile(ofdFileOpen.FileName,RichTextBoxStreamType.RichText);
+                editFilePath = ofdFileOpen.FileName;
+                this.Text = editFilePath;
             }
         }
 
         //ファイル名を指定しデータを保存
         private void FileSave(string editFileName)
         {
-            using (StreamWriter sw = new StreamWriter(editFileName, false, Encoding.GetEncoding("utf-8"))) {
-                sw.WriteLine(rtTextArea.Text);
-            }
+            rtTextArea.SaveFile(editFileName, RichTextBoxStreamType.RichText);
         }
 
         //名前を付けて保存
@@ -150,18 +188,13 @@ namespace TextEditer31030 {
         //ペースト
         private void PasteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(PasteToolStripMenuItem.Enabled == true) {
-                rtTextArea.Paste();
-            }
+            rtTextArea.Paste();
         }
 
         //削除
         private void DeleteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            if(DeleteToolStripMenuItem.Enabled == true) {
-                rtTextArea.SelectedText = "";
-            }
-
+            rtTextArea.SelectedText = "";
         }
 
         //カラー
@@ -180,5 +213,6 @@ namespace TextEditer31030 {
                 rtTextArea.SelectionFont = fdFont.Font;
             }
         }
+
     }
 }
